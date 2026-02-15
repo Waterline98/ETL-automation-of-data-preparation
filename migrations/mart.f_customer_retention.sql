@@ -87,6 +87,4 @@ FULL JOIN ret_cl ON (new_cl.week_of_year,
                                         ret_cl.item_id)
 FULL JOIN ref_cl ON (new_cl.week_of_year,
                      new_cl.item_id) = (ref_cl.week_of_year,
-                                        ref_cl.item_id)
-ORDER BY new_cl.week_of_year,
-         new_cl.item_id;
+                                        ref_cl.item_id);
