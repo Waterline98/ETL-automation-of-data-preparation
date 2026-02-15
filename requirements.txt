@@ -1,0 +1,4 @@
+# DAG dependencies (Airflow is installed separately)
+apache-airflow-providers-postgres>=5.0.0
+pandas>=1.5.0
+requests>=2.28.0

@@ -8,18 +8,13 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.hooks.http_hook import HttpHook
 from airflow.models import Variable
-
-
-
-HTTP_CONN_ID = 'http_sales_api'
 
 
 NICKNAME = Variable.get("sales_mart_nickname", default_var="default_nick")
 COHORT = Variable.get("sales_mart_cohort", default_var="default_cohort")
 API_KEY = Variable.get("sales_mart_api_key", default_var=None)
-POSTGRES_CONN_ID = Variable.get("postgres_conn_id")
+POSTGRES_CONN_ID = Variable.get("postgres_conn_id", default_var="postgres_default")
 
 BASE_URL = Variable.get("sales_mart_base_url", default_var="https://api.example.com")
 
@@ -105,19 +100,21 @@ def upload_data_to_staging(filename, date, pg_table, pg_schema, ti):
 
     postgres_hook = PostgresHook(POSTGRES_CONN_ID)
     engine = postgres_hook.get_sqlalchemy_engine()
-    row_count = df.to_sql(
+    df.to_sql(
         pg_table,
         engine,
         schema=pg_schema,
         if_exists='append',
         index=False
     )
-    print(f'{row_count} rows inserted into {pg_schema}.{pg_table}')
+    print(f'{len(df)} rows inserted into {pg_schema}.{pg_table}')
 
 
+_args_owner = Variable.get("dag_owner", default_var="airflow")
+_args_email = Variable.get("dag_owner_email", default_var="")
 args = {
-    "owner": "vladislav_gilyazov",
-    "email": ["octagon4469@gmail.com"],
+    "owner": _args_owner,
+    "email": [_args_email] if _args_email else [],
     "email_on_failure": True,
     "email_on_retry": False,
     "retries": 3,
